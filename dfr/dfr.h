@@ -70,6 +70,9 @@ namespace dfr {
 
 		@param out_containingRect Array of 4 ints. Will be filled the containing rectangle of the text
 		rendered. x,y,w,h
+
+		@param in_rightToLeft For arabic text. This is experimental. But can get a rough job done
+		for simple labels
 	*/
 	void drawText(
 		const std::string& in_text,
