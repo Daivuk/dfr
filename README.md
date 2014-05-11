@@ -9,32 +9,32 @@
 
 ## Quick tutorial
 Call init
-```
+``` cpp
 dfr::init();
 ```
 Create your image buffer. Must be 32 bits per pixel -> RGBA
-```
+``` cpp
 unsigned char* pImgData = new unsigned char [image_width * image_height * 4];
 ```
 Initialize the image to all transparent
-```
+``` cpp
 memset(pImgData, 0, texture_width * texture_height * 4);
 ```
 Draw your text onto your image buffer
-```
+``` cpp
 dfr::drawText("Hello World!", pImgData, image_width, image_height, "yourFontFile.ttf", 24);
 ```
 Do what ever you please with your image buffer, like creating a texture:
-```
+``` cpp
 Texture* pTexture = createTextureFromData(image_width, image_height, pImgData); // This is not part of dfr
 ```
 Release resources
-```
+``` cpp
 delete[] pImageData;
 ```
 
 ## Quick documentation
-```
+``` cpp
 void dfr::drawText(
 	const std::string& in_text,
 	unsigned char* out_buffer, const unsigned int in_width, const unsigned int in_height,
