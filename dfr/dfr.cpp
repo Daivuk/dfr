@@ -21,11 +21,11 @@ namespace dfr {
 		g_isInitialized = true;
 	}
 
-	inline int ttf_max(int a, int b) {
+	inline int dfr_max(int a, int b) {
 		return a - ((a - b) & (a - b) >> 31);
 	}
 
-	inline int ttf_min(int a, int b) {
+	inline int dfr_min(int a, int b) {
 		return a + (((b - a) >> 31) & (b - a));
 	}
 
@@ -36,12 +36,13 @@ namespace dfr {
 		bool in_wordWrap,
 		const sColor& in_color,
 		eAlign in_align,
-		const unsigned int in_minSize) {
+		const unsigned int in_minSize,
+		int* out_containingRect) {
 
 		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 		std::wstring wText = converter.from_bytes(in_text);
 
-		drawText(wText, out_buffer, in_width, in_height, in_font, in_size, in_wordWrap, in_color, in_align, in_minSize);
+		drawText(wText, out_buffer, in_width, in_height, in_font, in_size, in_wordWrap, in_color, in_align, in_minSize, out_containingRect);
 	}
 
 	void drawText(
@@ -51,7 +52,8 @@ namespace dfr {
 		bool in_wordWrap,
 		const sColor& in_color,
 		eAlign in_align,
-		const unsigned int in_minSize) {
+		const unsigned int in_minSize,
+		int* out_containingRect) {
 		FT_Face face;
 
 		g_ttfFacesMutex.lock();
@@ -99,6 +101,12 @@ namespace dfr {
 			int lastWordWidth = 0;
 			std::vector<sLine> lines;
 			sLine currentLine;
+			if (out_containingRect) {
+				out_containingRect[0] = (int) in_width;
+				out_containingRect[1] = (int) in_height;
+				out_containingRect[2] = 0;
+				out_containingRect[3] = 0;
+			}
 
 			for (n = 0; n < num_chars; ++n) {
 				// Get the glyph metrics only
@@ -129,7 +137,7 @@ namespace dfr {
 				}
 
 				if (pen_x + gW >= (int) in_width && in_wordWrap) {
-					maxW = ttf_max(maxW, pen_x);
+					maxW = dfr_max(maxW, pen_x);
 
 					if (text[n] == ' ') {
 						// We will new line and ignore that space
@@ -180,7 +188,7 @@ namespace dfr {
 			}
 
 			if (pen_x) {
-				maxW = ttf_max(maxW, pen_x);
+				maxW = dfr_max(maxW, pen_x);
 				currentLine.width = pen_x;
 				currentLine.to = n - 1;
 				lines.push_back(currentLine);
@@ -244,15 +252,21 @@ namespace dfr {
 					FT_Bitmap* bitmap = &slot->bitmap;
 
 					int limits[4] = {
-						ttf_max(0, glyphX) - glyphX,
-						ttf_max(0, glyphY) - glyphY,
-						ttf_min((int) in_width, bitmap->width + glyphX) - glyphX,
-						ttf_min((int) in_height, bitmap->rows + glyphY) - glyphY,
+						dfr_max(0, glyphX) - glyphX,
+						dfr_max(0, glyphY) - glyphY,
+						dfr_min((int) in_width, bitmap->width + glyphX) - glyphX,
+						dfr_min((int) in_height, bitmap->rows + glyphY) - glyphY,
 					};
+					if (out_containingRect) {
+						out_containingRect[0] = dfr_min(limits[0] + glyphX, out_containingRect[0]);
+						out_containingRect[1] = dfr_min(limits[1] + glyphY, out_containingRect[1]);
+						out_containingRect[2] = dfr_max(limits[2] + glyphX, out_containingRect[2]);
+						out_containingRect[3] = dfr_max(limits[3] + glyphY, out_containingRect[3]);
+					}
 					for (y = limits[1]; y < limits[3]; y++) {
 						for (x = limits[0]; x < limits[2]; x++) {
 							k = ((y + glyphY) * in_width + x + glyphX) * 4;
-							alpha = ttf_max(out_buffer[k + 3], bitmap->buffer[y * bitmap->pitch + x]);
+							alpha = dfr_max(out_buffer[k + 3], bitmap->buffer[y * bitmap->pitch + x]);
 							out_buffer[k + 0] = in_color.r * alpha / 255;
 							out_buffer[k + 1] = in_color.g * alpha / 255;
 							out_buffer[k + 2] = in_color.b * alpha / 255;
@@ -274,6 +288,11 @@ namespace dfr {
 			}
 
 			break;
+		}
+
+		if (out_containingRect) {
+			out_containingRect[2] -= out_containingRect[0];
+			out_containingRect[3] -= out_containingRect[1];
 		}
 	}
 };

@@ -67,6 +67,9 @@ namespace dfr {
 		@param in_minSize Minimum size allowed for the font. If the text doesn't fit in the image,
 		the renderer will pick a point size bellow and try again. Until this value is reached.
 		If a value of 0 is passed, autosize is disabled.
+
+		@param out_containingRect Array of 4 ints. Will be filled the containing rectangle of the text
+		rendered. x,y,w,h
 	*/
 	void drawText(
 		const std::string& in_text,
@@ -75,7 +78,8 @@ namespace dfr {
 		bool in_wordWrap = true,
 		const sColor& in_color = { 255, 255, 255 },
 		eAlign in_align = ALIGN_TOP_LEFT,
-		const unsigned int in_minSize = 0);
+		const unsigned int in_minSize = 0,
+		int* out_containingRect = NULL);
 	void drawText(
 		const std::wstring& in_text,
 		unsigned char* out_buffer, const unsigned int in_width, const unsigned int in_height,
@@ -83,5 +87,6 @@ namespace dfr {
 		bool in_wordWrap = true,
 		const sColor& in_color = { 255, 255, 255 },
 		eAlign in_align = ALIGN_TOP_LEFT,
-		const unsigned int in_minSize = 0);
+		const unsigned int in_minSize = 0,
+		int* out_containingRect = NULL);
 };
