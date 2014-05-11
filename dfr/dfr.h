@@ -79,7 +79,8 @@ namespace dfr {
 		const sColor& in_color = { 255, 255, 255 },
 		eAlign in_align = ALIGN_TOP_LEFT,
 		const unsigned int in_minSize = 0,
-		int* out_containingRect = NULL);
+		int* out_containingRect = NULL,
+		bool in_rightToLeft = false);
 	void drawText(
 		const std::wstring& in_text,
 		unsigned char* out_buffer, const unsigned int in_width, const unsigned int in_height,
@@ -88,5 +89,6 @@ namespace dfr {
 		const sColor& in_color = { 255, 255, 255 },
 		eAlign in_align = ALIGN_TOP_LEFT,
 		const unsigned int in_minSize = 0,
-		int* out_containingRect = NULL);
+		int* out_containingRect = NULL,
+		bool in_rightToLeft = false);
 };

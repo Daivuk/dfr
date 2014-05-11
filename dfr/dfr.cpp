@@ -37,12 +37,13 @@ namespace dfr {
 		const sColor& in_color,
 		eAlign in_align,
 		const unsigned int in_minSize,
-		int* out_containingRect) {
+		int* out_containingRect,
+		bool in_rightToLeft) {
 
 		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 		std::wstring wText = converter.from_bytes(in_text);
 
-		drawText(wText, out_buffer, in_width, in_height, in_font, in_size, in_wordWrap, in_color, in_align, in_minSize, out_containingRect);
+		drawText(wText, out_buffer, in_width, in_height, in_font, in_size, in_wordWrap, in_color, in_align, in_minSize, out_containingRect, in_rightToLeft);
 	}
 
 	void drawText(
@@ -53,7 +54,8 @@ namespace dfr {
 		const sColor& in_color,
 		eAlign in_align,
 		const unsigned int in_minSize,
-		int* out_containingRect) {
+		int* out_containingRect,
+		bool in_rightToLeft) {
 		FT_Face face;
 
 		g_ttfFacesMutex.lock();
@@ -111,7 +113,8 @@ namespace dfr {
 			for (n = 0; n < num_chars; ++n) {
 				// Get the glyph metrics only
 				FT_UInt  glyph_index;
-				glyph_index = FT_Get_Char_Index(face, text[n]);
+				unsigned short c = (unsigned short) text[n];
+				glyph_index = FT_Get_Char_Index(face, c);
 				error = FT_Load_Glyph(face, glyph_index, FT_LOAD_DEFAULT);
 				if (error) continue;
 
@@ -229,7 +232,13 @@ namespace dfr {
 				int leftOver = (int) in_width - line.width;
 				int cCount = line.to - line.from + 1;
 				if (allowJustify) pen_x = 0;
-				for (n = line.from; n <= line.to; ++n) {
+				// 	for (n = line.from; n <= line.to; ++n)
+				if (in_rightToLeft) n = line.to;
+				else n = line.from;
+				while (true) {
+					if (in_rightToLeft) { if (n < line.from) break; }
+					else if (n > line.to) break;
+
 					// Get the glyph
 					FT_UInt  glyph_index;
 					glyph_index = FT_Get_Char_Index(face, text[n]);
@@ -275,13 +284,26 @@ namespace dfr {
 					}
 
 					int advance = slot->advance.x >> 6;
-					if (n > line.from) {
-						FT_UInt leftGlyph = FT_Get_Char_Index(face, text[n - 1]);
-						FT_Vector kerning;
-						FT_Get_Kerning(face, leftGlyph, glyph_index, FT_KERNING_DEFAULT, &kerning);
-						advance += kerning.x;
+					if (in_rightToLeft) {
+						if (n < line.to) {
+							FT_UInt leftGlyph = FT_Get_Char_Index(face, text[n + 1]);
+							FT_Vector kerning;
+							FT_Get_Kerning(face, leftGlyph, glyph_index, FT_KERNING_DEFAULT, &kerning);
+							advance += kerning.x;
+						}
+					}
+					else {
+						if (n > line.from) {
+							FT_UInt leftGlyph = FT_Get_Char_Index(face, text[n - 1]);
+							FT_Vector kerning;
+							FT_Get_Kerning(face, leftGlyph, glyph_index, FT_KERNING_DEFAULT, &kerning);
+							advance += kerning.x;
+						}
 					}
 					pen_x += advance;
+
+					if (in_rightToLeft) --n;
+					else ++n;
 				}
 				pen_y += lineHeight;
 				++lineCpt;
