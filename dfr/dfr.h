@@ -3,9 +3,6 @@
 #include <string>
 
 namespace dfr {
-	struct sColor {
-		unsigned char r, g, b;
-	};
 
 	enum eAlignV {
 		ALIGNV_TOP		= 0x1,
@@ -41,6 +38,41 @@ namespace dfr {
 		ALIGN_BOTTOM_RIGHT_JUSTIFY	= ALIGNV_BOTTOM | ALIGNH_RIGHT | ALIGNH_JUSTIFY
 	};
 
+	struct sPoint {
+		int x, y;
+	};
+
+	struct sRect {
+		int x, y, w, h;
+	};
+
+	struct sColor {
+		unsigned char r, g, b;
+	};
+
+	struct sRenderInfo {
+		sRect	renderedRect;		/** Area that was rendered */
+		int		renderedPointSize;	/** Point size that was used for the render */
+		sPoint	cursorPosition;		/** The cursor position after the render. y is the current baseline */
+	};
+
+	struct sImage {
+		unsigned char*	pData;			/** Pointeur to image data */ 
+		int				width, height;	/** Dimensions of the image */
+	};
+
+	struct sFont {
+		std::string filename;	/** Filename to the .ttf file */
+		int			pointSize;
+	};
+
+	struct sFormating {
+		bool	wordWrap;
+		eAlign	align;
+		int		minPointSize;	/** Minimum point size for autoresize. Set to 0 for no autoresize */
+		bool	rightToLeft;	/** For arabic languages */
+	};
+
 	void init();
 
 	/**
@@ -48,50 +80,26 @@ namespace dfr {
 
 		@param in_text Text to render. i.e: "Hello World!"
 
-		@param out_buffer Your image buffer. This should be of size in_width * in_height * 4
+		@param in_font sFont structure defining the Font. Filename, pointsize
 
-		@param in_width Width of your image
+		@param in_outputImage sImage structure defining the target image.
 
-		@param in_height Height of your image
+		@param in_formating sFormating structure defining text formating, alignement, wordwrap and autosize.
 
-		@param in_font Font filename. i.e: "Content/Fonts/OpenSans-Semibold.ttf"
+		@param in_color Color of the text RGB. Each component in range 0-255
 
-		@param in_size Point size for the font.
-
-		@param in_wordWrap Enable multi lines if the text is too long
-
-		@param in_color RGB color for the text. Values are in range 0-255
-
-		@param in_align One of dfr::eAlign value.
-
-		@param in_minSize Minimum size allowed for the font. If the text doesn't fit in the image,
-		the renderer will pick a point size bellow and try again. Until this value is reached.
-		If a value of 0 is passed, autosize is disabled.
-
-		@param out_containingRect Array of 4 ints. Will be filled the containing rectangle of the text
-		rendered. x,y,w,h
-
-		@param in_rightToLeft For arabic text. This is experimental. But can get a rough job done
-		for simple labels
+		@return sRenderInfo structure containing information about the render. Rectangle, cursor position, etc.
 	*/
-	void drawText(
+	sRenderInfo drawText(
 		const std::string& in_text,
-		unsigned char* out_buffer, const unsigned int in_width, const unsigned int in_height,
-		const std::string& in_font, const unsigned int in_size,
-		bool in_wordWrap = true,
-		const sColor& in_color = { 255, 255, 255 },
-		eAlign in_align = ALIGN_TOP_LEFT,
-		const unsigned int in_minSize = 0,
-		int* out_containingRect = NULL,
-		bool in_rightToLeft = false);
-	void drawText(
+		const sImage& in_outputImage,
+		const sFont& in_font,
+		const sFormating& in_formating = { },
+		const sColor& in_color = { 255, 255, 255 });
+	sRenderInfo drawText(
 		const std::wstring& in_text,
-		unsigned char* out_buffer, const unsigned int in_width, const unsigned int in_height,
-		const std::string& in_font, const unsigned int in_size,
-		bool in_wordWrap = true,
-		const sColor& in_color = { 255, 255, 255 },
-		eAlign in_align = ALIGN_TOP_LEFT,
-		const unsigned int in_minSize = 0,
-		int* out_containingRect = NULL,
-		bool in_rightToLeft = false);
+		const sImage& in_outputImage,
+		const sFont& in_font,
+		const sFormating& in_formating = {},
+		const sColor& in_color = { 255, 255, 255 });
 };
