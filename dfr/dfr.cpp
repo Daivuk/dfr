@@ -114,7 +114,7 @@ namespace dfr {
 					FT_UInt leftGlyph = FT_Get_Char_Index(face, text[n - 1]);
 					FT_Vector kerning;
 					FT_Get_Kerning(face, leftGlyph, glyph_index, FT_KERNING_DEFAULT, &kerning);
-					advance += kerning.x;
+					advance += kerning.x >> 6;
 				}
 				int gW = advance;
 
@@ -286,7 +286,7 @@ namespace dfr {
 							FT_UInt leftGlyph = FT_Get_Char_Index(face, text[n - 1]);
 							FT_Vector kerning;
 							FT_Get_Kerning(face, leftGlyph, glyph_index, FT_KERNING_DEFAULT, &kerning);
-							advance += kerning.x;
+							advance += kerning.x >> 6;
 						}
 					}
 					pen.x += advance;
