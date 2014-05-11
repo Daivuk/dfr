@@ -72,3 +72,5 @@ If a value of 0 is passed, autosize is disabled.
 **out_containingRect** Array of 4 ints. Will be filled the containing rectangle of the text
 rendered. x,y,w,h
 
+**in_rightToLeft** For arabic text. This is experimental. But can get a rough job done
+for simple labels
