@@ -42,7 +42,7 @@ delete[] pImageData;
 
 === Quick documentation
 
-void dfr::drawText(
+	void dfr::drawText(
 		const std::string& in_text,
 		unsigned char* out_buffer, const unsigned int in_width, const unsigned int in_height,
 		const std::string& in_font, const unsigned int in_size,
