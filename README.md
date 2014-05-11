@@ -42,7 +42,8 @@ void dfr::drawText(
 	bool in_wordWrap = true,
 	const sColor& in_color = { 255, 255, 255 },
 	eAlign in_align = ALIGN_TOP_LEFT,
-	const unsigned int in_minSize = 0);
+	const unsigned int in_minSize = 0,
+	int* out_containingRect = NULL);
 ```
 Draw text using specific font and point size onto an image buffer.
 
@@ -68,4 +69,6 @@ Draw text using specific font and point size onto an image buffer.
 the renderer will pick a point size bellow and try again. Until this value is reached.
 If a value of 0 is passed, autosize is disabled.
 
+**out_containingRect** Array of 4 ints. Will be filled the containing rectangle of the text
+rendered. x,y,w,h
 
